@@ -6,4 +6,7 @@ os.system('clear')
 
 indeed_jobs = get_indeed_jobs()
 so_jobs = get_so_jobs()
-print(indeed_jobs)
+
+jobs = indeed_jobs + so_jobs
+
+print(jobs)

@@ -7,8 +7,31 @@ def get_last_page():
   result = requests.get(URL)
   soup = BeautifulSoup(result.text, "html.parser")
   pages = soup.find("div", {"class": "s-pagination"}).find_all("a")
-  print(pages)
+  last_page = pages[-2].get_text(strip=True)
+  return int(last_page)
+
+def extract_job(html):
+  title = html.find("h2").text.strip()
+  company = html.find("h3", {"class":"fs-body1"}).find_all("span", recursive=False) #span안에 span있는경우 밖꺼만 가져오려고 recursive=False
+  location = company[1].get_text(strip=True)
+  companys = company[0].get_text(strip=True)
+  job_id = html['data-jobid']
+  return {"title": title, "company": companys, "location": location, "apply-link": f"https://stackoverflow.com/jobs/{job_id}"}
+
+
+def extract_jobs(last_page):
+  jobs=[]
+  for page in range(last_page):
+    print(f"Scrapping SO: page: {page}")
+    result = requests.get(f"{URL}&pg={page+1}")
+    soup = BeautifulSoup(result.text, "html.parser")
+    results = soup.find_all("div", {"class" : "-job"})
+    for res in results:
+      job = extract_job(res)
+      jobs.append(job)
+  return jobs
 
 def get_jobs():
   last_page = get_last_page()
-  return []
+  jobs = extract_jobs(last_page)
+  return jobs
